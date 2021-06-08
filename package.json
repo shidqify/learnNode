@@ -1,0 +1,15 @@
+{
+  "name": "learnnode",
+  "version": "1.0.0",
+  "description": "Learning REST API with Nodejs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Shidqi Yusri",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1",
+    "sequelize": "^6.6.2"
+  }
+}
