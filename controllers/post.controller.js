@@ -13,7 +13,7 @@ function save(req, res){
         content: req.body.content,
         imageUrl: req.body.image_url,
         categoryId: req.body.category_id,
-        userId: 1
+        userId: req.userData.userId,
     }
 
     const schema = {
@@ -32,17 +32,26 @@ function save(req, res){
         });
     }
 
-    models.Post.create(post).then(result => {
-        res.status(201).json({
-            message: "Post created successfully",
-            post: result
-        });
-    }).catch(error => {
-        res.status(500).json({
-            message: "Something went wrong",
-            error: error
-        });
+    models.Category.findByPk(req.body.category_id).then(result => {
+        if(result !== null){
+            models.Post.create(post).then(result => {
+                res.status(201).json({
+                    message: "Post created successfully",
+                    post: result
+                });
+            }).catch(error => {
+                res.status(500).json({
+                    message: "Something went wrong",
+                    error: error
+                });
+            });
+        }else{
+            res.status(400).json({
+                message: "Invalid Category ID",
+            });
+        }
     });
+
 }
 
 function show(req, res){
@@ -80,7 +89,7 @@ function update(req, res){
         imageUrl: req.body.image_url,
         categoryId: req.body.category_id,
     }
-    const userId = 1;
+    const userId = req.userData.userId;
 
     const schema = {
         title: {type: "string", optional: false, max: "100"},
@@ -97,30 +106,38 @@ function update(req, res){
             errors: validationResponse,
         });
     }
-
-    models.Post.update(updatedPost, {where: {id:id, userId: userId}}).then(result => {
-        if(result){
-            res.status(200).json({
-                message: "Post updated succesfully",
-                post: updatedPost
-            });
+    
+    models.Category.findByPk(req.body.category_id).then(result => {
+        if(result !== null){
+            models.Post.update(updatedPost, {where: {id:id, userId: userId}}).then(result => {
+                if(result){
+                    res.status(200).json({
+                        message: "Post updated succesfully",
+                        post: updatedPost
+                    });
+                }else{
+                    res.status(404).json({
+                        message : "Post not found!"
+                    });
+                }
+                
+            }).catch(error => {
+                res.status(500).json({
+                    message: "Something went wrong",
+                    error: error
+                });
+            })
         }else{
-            res.status(404).json({
-                message : "Post not found!"
+            res.status(400).json({
+                message: "Invalid Category ID",
             });
         }
-        
-    }).catch(error => {
-        res.status(500).json({
-            message: "Something went wrong",
-            error: error
-        });
-    })
+    });
 }
 
 function destroy(req, res){
     const id = req.params.id;
-    const userId = 1;
+    const userId = req.userData.userId;
 
     models.Post.destroy({where : {id:id, userId: userId}}).then(result => {
         if(result){
